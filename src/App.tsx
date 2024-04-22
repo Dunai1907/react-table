@@ -1,12 +1,11 @@
-import './App.css'
+import Table from "./Modules/Table/Table";
 
 function App() {
-
   return (
     <>
-      <div>Здесь будет приложение</div>
+      <Table />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
