@@ -6,24 +6,32 @@ import {
   useSortBy,
   useTable,
   useGlobalFilter,
+  useRowSelect,
 } from "react-table";
 import { Container, Box, Stack, Button } from "@mui/material";
 import { formatDateToMonth } from "@/utils/helpers";
 import { BiSortAlt2, BiSortDown, BiSortUp } from "react-icons/bi";
-import { GlobalFilter } from "./Components/Filers/Filters";
+import { GlobalFilter } from "./Components/Filters/Filters";
+import { useNavigate } from "react-router-dom";
+import { RouteUrls } from "@/Routes/Router";
 
 export type TableData = {
-  f_pers_young_spec_id: number;
-  insert_date: string;
+  f_pers_young_spec_id?: number;
+  insert_date: string | Date;
   insert_user: string;
   org_employee: string;
   rep_beg_period: string;
   rep_end_period: string;
-  update_date: string;
+  update_date: string | Date;
   update_user: string;
   period?: string;
   year?: string;
 };
+
+interface Row {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
 
 const sortTypes: Record<string, SortByFn<TableData>> = {
   string: (rowA, rowB, columnId) => {
@@ -61,8 +69,10 @@ const tableColumns: Column<TableData>[] = [
 ];
 
 const Table = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState<TableData[]>([]);
   const columns = useMemo(() => tableColumns, []);
+  const [selectedRow, setSelectedRow] = useState<Row | null>(null);
 
   const tableInstance = useTable(
     {
@@ -71,13 +81,14 @@ const Table = () => {
       sortTypes,
     },
     useGlobalFilter,
-    useSortBy
+    useSortBy,
+    useRowSelect
   );
   const spec = new SpecApi();
 
   useEffect(() => {
     const getData = async () => {
-      const data: TableData[] = await spec.getSpecInfo();
+      const data: TableData[] = await spec.getTables();
       setData(data);
     };
     getData();
@@ -94,8 +105,9 @@ const Table = () => {
     state,
   } = tableInstance;
 
-  const selectTable = (row: unknown) => {
-    console.log("row <-------", row);
+  const selectTable = (row: Row) => {
+    setSelectedRow(row);
+    localStorage.setItem("formId", row.original.f_pers_young_spec_id);
   };
 
   return (
@@ -113,19 +125,12 @@ const Table = () => {
           globalFilter={state.globalFilter}
           setGlobalFilter={setGlobalFilter}
         />
-        <Button
-          variant="outlined"
-          onClick={() => {
-            console.log("ДОБАВИТЬ <-------");
-          }}
-        >
+        <Button variant="outlined" onClick={() => navigate(RouteUrls.form)}>
           ДОБАВИТЬ
         </Button>
         <Button
           variant="outlined"
-          onClick={() => {
-            console.log("ПРОСМОТРЕТЬ <-------");
-          }}
+          onClick={() => navigate(RouteUrls.viewTable)}
         >
           ПРОСМОТРЕТЬ
         </Button>
@@ -176,10 +181,23 @@ const Table = () => {
             {rows.map((row) => {
               prepareRow(row);
               return (
-                <tr onClick={() => selectTable(row)} {...row.getRowProps()}>
+                <tr
+                  onClick={() => selectTable(row)}
+                  style={{
+                    border: "1px solid black",
+                    backgroundColor:
+                      selectedRow === row ? "lightgray" : "white",
+                  }}
+                  {...row.getRowProps()}
+                >
                   {row.cells.map((cell) => {
                     return (
-                      <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                      <td
+                        style={{ border: "1px solid black" }}
+                        {...cell.getCellProps()}
+                      >
+                        {cell.render("Cell")}
+                      </td>
                     );
                   })}
                 </tr>
