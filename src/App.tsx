@@ -1,11 +1,7 @@
-import Table from "./Modules/Table/Table";
+import Router from "./Routes/Router";
 
 function App() {
-  return (
-    <>
-      <Table />
-    </>
-  );
+  return <Router />
 }
 
 export default App;

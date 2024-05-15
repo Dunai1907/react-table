@@ -13,6 +13,8 @@ export const months = [
   "Декабрь",
 ];
 
+export const USER = "user19";
+
 export const myColumns = [
   {
     Header: "Наименование показателя",

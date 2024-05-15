@@ -14,6 +14,7 @@ export abstract class ApiBase {
       baseURL: this.handle,
       responseType: "json",
       headers: { "Content-Type": "application/json" },
+      // params: {}
     });
   }
 }
